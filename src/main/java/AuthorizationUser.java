@@ -1,49 +1,37 @@
 import io.qameta.allure.Step;
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import io.restassured.response.ValidatableResponse;
 
 import static io.restassured.RestAssured.given;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
+import static org.hamcrest.Matchers.equalTo;
 
 public class AuthorizationUser {
 
-    private String email;
-    private String password;
-
-    public AuthorizationUser(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
     @Step("Запрос на авторизацию пользователя")
-    public Response authorizationUser (AuthorizationUser existingUser) {
+    public Response authorizationUser(UserLambok existingUser) {
         return given().log().all()
                 .contentType(ContentType.JSON)
+                .filter((new AllureRestAssured()))
                 .body(existingUser)
                 .when().post(Constant.API_LOGIN);
     }
 
-        @Step("Авторизация успешна")
-        public ValidatableResponse authorizationUserOK (Response response) {
-          return  response.then().log().all()
-                    .assertThat()
-                    .statusCode(HTTP_OK);
+    @Step("Авторизация успешна")
+    public void authorizationUserOK(Response response) {
+        response.then().log().all()
+                .assertThat()
+                .statusCode(HTTP_OK)
+                .and().assertThat().body("success", equalTo(true));
     }
 
     @Step("Авторизация не выполнена")
-    public ValidatableResponse authorizationUserOff (Response response) {
-        return  response.then().log().all()
+    public void authorizationUserOff(Response response) {
+        response.then().log().all()
                 .assertThat()
-                .statusCode(HTTP_UNAUTHORIZED);
+                .statusCode(HTTP_UNAUTHORIZED)
+                .and().assertThat().body("message", equalTo("email or password are incorrect"));
     }
 }

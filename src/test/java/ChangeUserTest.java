@@ -1,4 +1,3 @@
-import com.github.javafaker.Faker;
 import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
@@ -11,13 +10,9 @@ import org.junit.Test;
 
 public class ChangeUserTest {
 
-    Faker faker = new Faker();
-    private String email = faker.internet().emailAddress();
-    private String password = faker.internet().password(6, 10);
-    private String name = faker.name().username();
-    private String changeEmail = faker.internet().emailAddress();
-    private String changeName = faker.name().username();
-
+    CreatingUser creatingUser = GeneratorUser.getRandomUser();
+    private String changeEmail = GeneratorUser.getRandomEmail();
+    private String changeName = GeneratorUser.getRandomName();
 
     String token;
     String secondToken;
@@ -28,47 +23,43 @@ public class ChangeUserTest {
         RestAssured.baseURI = Constant.URL_BURGER;
     }
 
-    CreatingUser creatingUser = new CreatingUser (email,password,name);
-    CreatingUser creatingEmailUser = new CreatingUser (changeEmail,password,changeName);
-    ChangeUser changeNameUser = new ChangeUser(creatingUser.getEmail(),changeName);
-    ChangeUser changeEmailUser = new ChangeUser(changeEmail,creatingUser.getName());
+    CreatingUser creatingEmailUser = new CreatingUser(changeEmail, creatingUser.getPassword(), changeName);
+    ChangeUser changeNameUser = new ChangeUser(creatingUser.getEmail(), changeName);
+    ChangeUser changeEmailUser = new ChangeUser(changeEmail, creatingUser.getName());
 
     @Test
     @DisplayName("Check change name user without Authorization")
     @Description("PATCH api/auth/user")
-    public void checkChangeNameUserWithoutAuthorization() {
+    public void ChangeNameUserWithoutAuthorizationTest() {
         Response creatingResponse = creatingUser.creatingUser(creatingUser);
         token = creatingUser.checkCreatedOK(creatingResponse);
 
         Response response = changeNameUser.changeUserWithoutAuthorization(changeNameUser);
-        String message = changeNameUser.errorAuthorization(response);
-
-        Assert.assertEquals("You should be authorised", message);
+        changeNameUser.errorAuthorization(response);
     }
 
     @Test
     @DisplayName("Check change email user without Authorization")
     @Description("PATCH api/auth/user")
-    public void checkChangeEmailUserWithoutAuthorization() {
+    public void ChangeEmailUserWithoutAuthorizationTest() {
         Response creatingResponse = creatingUser.creatingUser(creatingUser);
         token = creatingUser.checkCreatedOK(creatingResponse);
 
         Response response = changeEmailUser.changeUserWithoutAuthorization(changeEmailUser);
-        String message = changeEmailUser.errorAuthorization(response);
-
-        Assert.assertEquals("You should be authorised",message);
+        changeEmailUser.errorAuthorization(response);
     }
 
     @Test
     @DisplayName("Check change name user with Authorization")
     @Description("PATCH api/auth/user")
-    public void checkChangeNameUserWithAuthorization() {
+    public void ChangeNameUserWithAuthorizationTest() {
         Response creatingResponse = creatingUser.creatingUser(creatingUser);
         token = creatingUser.checkCreatedOK(creatingResponse);
 
-        Response response = changeNameUser.changeUserWithAuthorization(changeNameUser,token);
-        boolean message = changeNameUser.changeUserOk(response);
-        Assert.assertTrue(message);
+        Response response = changeNameUser.changeUserWithAuthorization(changeNameUser, token);
+        changeNameUser.changeUserOk(response);
+        String message = changeNameUser.changeNameUser(response);
+        Assert.assertEquals(changeNameUser.getName(), message);
     }
 
     @Test
@@ -78,9 +69,10 @@ public class ChangeUserTest {
         Response creatingResponse = creatingUser.creatingUser(creatingUser);
         token = creatingUser.checkCreatedOK(creatingResponse);
 
-        Response response = changeEmailUser.changeUserWithAuthorization(changeEmailUser,token);
-        boolean message = changeEmailUser.changeUserOk(response);
-        Assert.assertTrue(message);
+        Response response = changeEmailUser.changeUserWithAuthorization(changeEmailUser, token);
+        changeEmailUser.changeUserOk(response);
+        String message = changeEmailUser.changeEmailUser(response);
+        Assert.assertEquals(changeEmailUser.getEmail(), message);
     }
 
     @Test
@@ -93,11 +85,9 @@ public class ChangeUserTest {
         Response creatingEmailResponse = creatingUser.creatingUser(creatingEmailUser);
         secondToken = creatingUser.checkCreatedOK(creatingEmailResponse);
 
-        Response secondResponse = changeEmailUser.changeUserWithAuthorization(changeEmailUser,token);
-        String message = changeEmailUser.changeUserForbidden(secondResponse);
-        Assert.assertEquals("User with such email already exists", message);
+        Response secondResponse = changeEmailUser.changeUserWithAuthorization(changeEmailUser, token);
+        changeEmailUser.changeUserForbidden(secondResponse);
     }
-
 
     @After
     public void deleteOrder() {

@@ -1,21 +1,15 @@
-import com.github.javafaker.Faker;
+
 import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import io.restassured.response.ValidatableResponse;
+
 import jdk.jfr.Description;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class AuthorizationUserTest {
-
-    Faker faker = new Faker();
-    private String email = faker.internet().emailAddress();
-    private String password = faker.internet().password(6, 10);
-    private String name = faker.name().username();
 
     String token;
 
@@ -25,31 +19,36 @@ public class AuthorizationUserTest {
         RestAssured.baseURI = Constant.URL_BURGER;
     }
 
-    CreatingUser creatingUser = new CreatingUser (email,password,name);
-    AuthorizationUser existingUser = new AuthorizationUser(creatingUser.getEmail(),creatingUser.getPassword());
-    AuthorizationUser wrongUser = new AuthorizationUser(creatingUser.getEmail(),password);
+    CreatingUser creatingUser = GeneratorUser.getRandomUser();
+    UserLambok existingUser = new UserLambok(creatingUser.getEmail(), creatingUser.getPassword());
+    UserLambok userWithWrongPassword = new UserLambok(creatingUser.getEmail(), GeneratorUser.getRandomPassword());
+    UserLambok userWithWrongEmail = new UserLambok(GeneratorUser.getRandomEmail(), creatingUser.getPassword());
 
     @Test
     @DisplayName("Check authorization existing user")
     @Description("POST api/auth/login")
-    public void checkAuthorizationExistingUser() {
+    public void authorizationExistingUserTest() {
         Response creatingResponse = creatingUser.creatingUser(creatingUser);
         token = creatingUser.checkCreatedOK(creatingResponse);
 
         Response authorizationResponse = existingUser.authorizationUser(existingUser);
-        ValidatableResponse result = existingUser.authorizationUserOK(authorizationResponse);
-
-        Assert.assertTrue(result.extract().path("success"));
+        existingUser.authorizationUserOK(authorizationResponse);
     }
 
     @Test
-    @DisplayName("Check authorization existing user")
+    @DisplayName("Check authorization existing user with an incorrect password")
     @Description("POST api/auth/login")
-    public void checkAuthorizationWrongUser() {
-        Response authorizationResponse = wrongUser.authorizationUser(wrongUser);
-        ValidatableResponse result = wrongUser.authorizationUserOff(authorizationResponse);
+    public void authorizationUserWithWrongPasswordTest() {
+        Response authorizationResponse = userWithWrongPassword.authorizationUser(userWithWrongPassword);
+        userWithWrongPassword.authorizationUserOff(authorizationResponse);
+    }
 
-        Assert.assertEquals("email or password are incorrect",result.extract().path("message"));
+    @Test
+    @DisplayName("Check authorization existing user with an incorrect email")
+    @Description("POST api/auth/login")
+    public void authorizationUserWithWrongEmailTest() {
+        Response authorizationResponse = userWithWrongEmail.authorizationUser(userWithWrongEmail);
+        userWithWrongEmail.authorizationUserOff(authorizationResponse);
     }
 
     @After
