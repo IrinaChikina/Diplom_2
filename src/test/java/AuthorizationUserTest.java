@@ -1,15 +1,12 @@
-
 import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
-
 import jdk.jfr.Description;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AuthorizationUserTest {
+public class AuthorizationUserTest extends BaseTest {
     String token;
 
     CreatingUser creatingUser = new CreatingUser();
@@ -19,10 +16,9 @@ public class AuthorizationUserTest {
     UserLombok userWithWrongPassword = UserLombok.builder().email(createdUser.getEmail()).password(GeneratorUser.getRandomPassword()).build();
     UserLombok userWithWrongEmail = UserLombok.builder().email(GeneratorUser.getRandomEmail()).password(createdUser.getPassword()).build();
 
-    @Step("Запуск Stellar Burgers")
+    @Step("Создание пользователя")
     @Before
-    public void setUp() {
-        RestAssured.baseURI = Constant.URL_BURGER;
+    public void creatingNewUser() {
         Response creatingResponse = creatingUser.creatingUser(createdUser);
         token = creatingUser.checkCreatedOK(creatingResponse);
     }
@@ -52,7 +48,7 @@ public class AuthorizationUserTest {
     }
 
     @After
-    public void deleteOrder() {
+    public void deleteUser() {
         if (token != null)
             creatingUser.deleteUser(token);
     }
