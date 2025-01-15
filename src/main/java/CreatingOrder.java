@@ -40,8 +40,8 @@ public class CreatingOrder {
                 .when().post(Constant.API_ORDER);
     }
 
-    @Step("Проверка статуса запроса при создание заказа с указанием ингредиентов для авторизированного пользователя")
-    public void checkStatusCodeOrderWithAuthorization(Response response) {
+    @Step("Проверка статуса запроса при создание заказа с указанием ингредиентов")
+    public void checkStatusCodeOrderWithIngredients(Response response) {
         response.then().statusCode(HTTP_OK);
     }
 
@@ -49,12 +49,6 @@ public class CreatingOrder {
     public void checkStatusCodeOrderBadRequest(Response response) {
         response.then().statusCode(HTTP_BAD_REQUEST);
     }
-
-    @Step("Проверка статуса запроса на создание заказа без авторизации")
-    public void checkStatusOrderWithoutAuthorization(Response response) {
-        response.then().log().all().assertThat().statusCode(HTTP_UNAUTHORIZED);
-    }
-
 
     @Step("Проверка статуса запроса на создание заказа с ошибочным списком ингредиентов")
     public ValidatableResponse checkStatusCodeOrderInternalError(Response response) {

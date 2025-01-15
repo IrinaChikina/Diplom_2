@@ -1,24 +1,15 @@
-import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-public class ListOrderTest {
+public class ListOrderTest extends BaseTest {
     String token;
 
     ListOrder listOrder = new ListOrder();
     CreatingUser creatingUser = new CreatingUser();
     UserLombok createdUser = GeneratorUser.getRandomUser();
-
-    @Step("Запуск Stellar Burgers")
-    @Before
-    public void setUp() {
-        RestAssured.baseURI = Constant.URL_BURGER;
-    }
 
     @Test
     @DisplayName("Check get list order for user without authorization ")
@@ -37,7 +28,7 @@ public class ListOrderTest {
     }
 
     @After
-    public void deleteOrder() {
+    public void deleteUser() {
         if (token != null)
             creatingUser.deleteUser(token);
     }

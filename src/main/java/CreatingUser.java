@@ -3,6 +3,8 @@ import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import static io.restassured.RestAssured.given;
 import static java.net.HttpURLConnection.*;

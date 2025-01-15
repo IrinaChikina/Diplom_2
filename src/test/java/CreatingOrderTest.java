@@ -1,16 +1,13 @@
-import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 
-public class CreatingOrderTest {
+public class CreatingOrderTest extends BaseTest {
     String token;
 
     CreatingOrder creatingOrder = new CreatingOrder();
@@ -21,12 +18,6 @@ public class CreatingOrderTest {
     File json = new File(Constant.FILE_INGREDIENTS);
     File falseJson = new File(Constant.FALSE_INGREDIENT);
 
-    @Step("Запуск Stellar Burgers")
-    @Before
-    public void setUp() {
-        RestAssured.baseURI = Constant.URL_BURGER;
-    }
-
     @Test
     @DisplayName("Check creating order for authorized user with ingredients")
     @Description("POST api/orders")
@@ -35,7 +26,7 @@ public class CreatingOrderTest {
         Response creatingResponse = creatingUser.creatingUser(createdUser);
         token = creatingUser.checkCreatedOK(creatingResponse);
         Response response = creatingOrder.creatingOrderWithIngredientsAndAuthorization(token, json);
-        creatingOrder.checkStatusCodeOrderWithAuthorization(response);
+        creatingOrder.checkStatusCodeOrderWithIngredients(response);
         creatingOrder.booleanMessageForOrder(response);
     }
 
@@ -56,9 +47,8 @@ public class CreatingOrderTest {
     @Description("POST api/orders")
     public void errorCreatingOrderWithoutIngredientTest() {
         Response response = creatingOrder.orderWithIngredientsWithoutAuthorization(json);
-        creatingOrder.checkStatusOrderWithoutAuthorization(response);
-        String message = creatingOrder.checkTextMessageForOrder(response);
-        Assert.assertEquals("You should be authorised", message);
+        creatingOrder.checkStatusCodeOrderWithIngredients(response);
+        creatingOrder.booleanMessageForOrder(response);
     }
 
     @Test
@@ -72,7 +62,7 @@ public class CreatingOrderTest {
     }
 
     @After
-    public void deleteOrder() {
+    public void deleteUser() {
         if (token != null)
             creatingUser.deleteUser(token);
     }

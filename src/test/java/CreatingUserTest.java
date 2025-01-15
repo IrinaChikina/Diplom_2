@@ -1,15 +1,12 @@
-import io.qameta.allure.Step;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import jdk.jfr.Description;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
-public class CreatingUserTest {
+public class CreatingUserTest extends BaseTest {
     String token;
 
     CreatingUser creatingUser = new CreatingUser();
@@ -17,12 +14,6 @@ public class CreatingUserTest {
 
     UserLombok creatingUserWithoutPassword = new UserLombok(GeneratorUser.getRandomEmail(), null, GeneratorUser.getRandomName());
     UserLombok creatingUserWithoutEmail = new UserLombok(null, GeneratorUser.getRandomPassword(), GeneratorUser.getRandomName());
-
-    @Step("Запуск Stellar Burgers")
-    @Before
-    public void setUp() {
-        RestAssured.baseURI = Constant.URL_BURGER;
-    }
 
     @Test
     @DisplayName("Check creating user")
@@ -64,10 +55,8 @@ public class CreatingUserTest {
     }
 
     @After
-    public void deleteOrder() {
+    public void deleteUser() {
         if (token != null)
             creatingUser.deleteUser(token);
     }
 }
-
-
