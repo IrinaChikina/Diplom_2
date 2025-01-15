@@ -11,16 +11,15 @@ import org.junit.Test;
 import java.io.File;
 
 public class CreatingOrderTest {
-    CreatingOrder creatingOrder = new CreatingOrder();
-
-    CreatingUser creatingUser = GeneratorUser.getRandomUser();
-
     String token;
+
+    CreatingOrder creatingOrder = new CreatingOrder();
+    CreatingUser creatingUser = new CreatingUser();
+
+    UserLombok createdUser = GeneratorUser.getRandomUser();
 
     File json = new File(Constant.FILE_INGREDIENTS);
     File falseJson = new File(Constant.FALSE_INGREDIENT);
-
-    UserLambok existingUser = new UserLambok(creatingUser.getEmail(), creatingUser.getPassword());
 
     @Step("Запуск Stellar Burgers")
     @Before
@@ -33,7 +32,7 @@ public class CreatingOrderTest {
     @Description("POST api/orders")
 
     public void creatingOrderWithIngredientAndAuthorizationTest() {
-        Response creatingResponse = creatingUser.creatingUser(creatingUser);
+        Response creatingResponse = creatingUser.creatingUser(createdUser);
         token = creatingUser.checkCreatedOK(creatingResponse);
         Response response = creatingOrder.creatingOrderWithIngredientsAndAuthorization(token, json);
         creatingOrder.checkStatusCodeOrderWithAuthorization(response);
@@ -44,16 +43,13 @@ public class CreatingOrderTest {
     @DisplayName("Check creating order for authorized user without ingredients")
     @Description("POST api/orders")
     public void creatingOrderWithoutIngredientAndAuthorizationTest() {
-        Response creatingResponse = creatingUser.creatingUser(creatingUser);
+        Response creatingResponse = creatingUser.creatingUser(createdUser);
         token = creatingUser.checkCreatedOK(creatingResponse);
-        Response authorizationResponse = existingUser.authorizationUser(existingUser);
-        existingUser.authorizationUserOK(authorizationResponse);
         Response response = creatingOrder.orderWithoutIngredientsWithAuthorization(token);
         creatingOrder.checkStatusCodeOrderBadRequest(response);
         String message = creatingOrder.checkTextMessageForOrder(response);
         Assert.assertEquals("Ingredient ids must be provided", message);
     }
-
 
     @Test // баг
     @DisplayName("Check creating order with ingredients without authorization")
@@ -69,7 +65,7 @@ public class CreatingOrderTest {
     @DisplayName("Check creating order for authorized user with false ingredients")
     @Description("POST api/orders")
     public void creatingOrderWithAuthorizationAndFalseIngredientTest() {
-        Response creatingResponse = creatingUser.creatingUser(creatingUser);
+        Response creatingResponse = creatingUser.creatingUser(createdUser);
         token = creatingUser.checkCreatedOK(creatingResponse);
         Response response = creatingOrder.creatingOrderWithIngredientsAndAuthorization(token, falseJson);
         creatingOrder.checkStatusCodeOrderInternalError(response);

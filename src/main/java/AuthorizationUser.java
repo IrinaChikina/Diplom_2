@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class AuthorizationUser {
 
     @Step("Запрос на авторизацию пользователя")
-    public Response authorizationUser(UserLambok existingUser) {
+    public Response authorizationUser(UserLombok existingUser) {
         return given().log().all()
                 .contentType(ContentType.JSON)
                 .filter((new AllureRestAssured()))

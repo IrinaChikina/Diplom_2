@@ -10,10 +10,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class CreatingUserTest {
-
-    CreatingUser creatingUser = GeneratorUser.getRandomUser();
-
     String token;
+
+    CreatingUser creatingUser = new CreatingUser();
+    UserLombok createdUser = GeneratorUser.getRandomUser();
+
+    UserLombok creatingUserWithoutPassword = new UserLombok(GeneratorUser.getRandomEmail(), null, GeneratorUser.getRandomName());
+    UserLombok creatingUserWithoutEmail = new UserLombok(null, GeneratorUser.getRandomPassword(), GeneratorUser.getRandomName());
 
     @Step("Запуск Stellar Burgers")
     @Before
@@ -21,25 +24,23 @@ public class CreatingUserTest {
         RestAssured.baseURI = Constant.URL_BURGER;
     }
 
-    CreatingUser creatingUserWithoutPassword = new CreatingUser(GeneratorUser.getRandomEmail(), null, GeneratorUser.getRandomName());
-    CreatingUser creatingUserWithoutEmail = new CreatingUser(null, GeneratorUser.getRandomPassword(), GeneratorUser.getRandomName());
-
     @Test
     @DisplayName("Check creating user")
     @Description("POST api/auth/register")
     public void creatingUniqueUserTest() {
-        Response response = creatingUser.creatingUser(creatingUser);
+        Response response = creatingUser.creatingUser(createdUser);
         token = creatingUser.checkCreatedOK(response);
-         creatingUser.creatingUsersSuccessfully(response);
+        String result = creatingUser.creatingUsersSuccessfully(response);
+        Assert.assertEquals("Проверьте email созданного пользователя", createdUser.getEmail(), result);
     }
 
     @Test
     @DisplayName("Check creating two identical users")
     @Description("POST api/auth/register")
     public void createdEqualUsersTest() {
-        Response firstUser = creatingUser.creatingUser(creatingUser);
+        Response firstUser = creatingUser.creatingUser(createdUser);
         token = creatingUser.checkCreatedOK(firstUser);
-        Response secondUser = creatingUser.creatingUser(creatingUser);
+        Response secondUser = creatingUser.creatingUser(createdUser);
         ValidatableResponse result = creatingUser.creatingEqualUsers(secondUser);
         Assert.assertEquals("User already exists", result.extract().path("message"));
     }

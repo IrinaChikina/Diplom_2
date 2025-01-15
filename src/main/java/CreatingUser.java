@@ -3,23 +3,14 @@ import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 import static io.restassured.RestAssured.given;
 import static java.net.HttpURLConnection.*;
-import static org.hamcrest.Matchers.equalTo;
 
-@AllArgsConstructor
-@Data
 public class CreatingUser {
 
-    private String email;
-    private String password;
-    private String name;
-
     @Step("Запрос на создание нового пользователя")
-    public Response creatingUser(CreatingUser user) {
+    public Response creatingUser(UserLombok user) {
         return given().log().all()
                 .contentType(ContentType.JSON)
                 .filter((new AllureRestAssured()))
@@ -36,10 +27,10 @@ public class CreatingUser {
     }
 
     @Step("Пользователь успешно создан")
-    public void creatingUsersSuccessfully(Response response) {
-         response.then().log().all()
-                .assertThat()
-                .body("user.email", equalTo(getEmail()));
+    public String creatingUsersSuccessfully(Response response) {
+        return response.then()
+                .extract().path("user.email");
+
     }
 
     @Step("Пользователь не создан")

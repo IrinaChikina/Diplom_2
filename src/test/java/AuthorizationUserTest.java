@@ -10,27 +10,27 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class AuthorizationUserTest {
-
     String token;
+
+    CreatingUser creatingUser = new CreatingUser();
+    UserLombok createdUser = GeneratorUser.getRandomUser();
+
+    UserLombok existingUser = UserLombok.builder().email(createdUser.getEmail()).password(createdUser.getPassword()).build();
+    UserLombok userWithWrongPassword = UserLombok.builder().email(createdUser.getEmail()).password(GeneratorUser.getRandomPassword()).build();
+    UserLombok userWithWrongEmail = UserLombok.builder().email(GeneratorUser.getRandomEmail()).password(createdUser.getPassword()).build();
 
     @Step("Запуск Stellar Burgers")
     @Before
     public void setUp() {
         RestAssured.baseURI = Constant.URL_BURGER;
+        Response creatingResponse = creatingUser.creatingUser(createdUser);
+        token = creatingUser.checkCreatedOK(creatingResponse);
     }
-
-    CreatingUser creatingUser = GeneratorUser.getRandomUser();
-    UserLambok existingUser = new UserLambok(creatingUser.getEmail(), creatingUser.getPassword());
-    UserLambok userWithWrongPassword = new UserLambok(creatingUser.getEmail(), GeneratorUser.getRandomPassword());
-    UserLambok userWithWrongEmail = new UserLambok(GeneratorUser.getRandomEmail(), creatingUser.getPassword());
 
     @Test
     @DisplayName("Check authorization existing user")
     @Description("POST api/auth/login")
     public void authorizationExistingUserTest() {
-        Response creatingResponse = creatingUser.creatingUser(creatingUser);
-        token = creatingUser.checkCreatedOK(creatingResponse);
-
         Response authorizationResponse = existingUser.authorizationUser(existingUser);
         existingUser.authorizationUserOK(authorizationResponse);
     }

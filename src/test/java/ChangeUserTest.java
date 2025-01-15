@@ -9,84 +9,74 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ChangeUserTest {
+    String token;
+    String secondToken;
 
-    CreatingUser creatingUser = GeneratorUser.getRandomUser();
     private String changeEmail = GeneratorUser.getRandomEmail();
     private String changeName = GeneratorUser.getRandomName();
 
-    String token;
-    String secondToken;
+    ChangeUser changeUser = new ChangeUser();
+    CreatingUser creatingUser = new CreatingUser();
+
+    UserLombok createdUser = GeneratorUser.getRandomUser();
+    UserLombok creatingSecondUser = GeneratorUser.getRandomUser();
+
+    UserLombok changeNameUser = UserLombok.builder().email(createdUser.getEmail()).name(changeName).build();
+    UserLombok changeEmailUser = UserLombok.builder().email(changeEmail).name(createdUser.getName()).build();
+    UserLombok changeEmailUserOnAlien = UserLombok.builder().email(creatingSecondUser.getEmail()).name(createdUser.getName()).build();
 
     @Step("Запуск Stellar Burgers")
     @Before
     public void setUp() {
         RestAssured.baseURI = Constant.URL_BURGER;
+        Response creatingResponse = creatingUser.creatingUser(createdUser);
+        token = creatingUser.checkCreatedOK(creatingResponse);
     }
-
-    CreatingUser creatingEmailUser = new CreatingUser(changeEmail, creatingUser.getPassword(), changeName);
-    ChangeUser changeNameUser = new ChangeUser(creatingUser.getEmail(), changeName);
-    ChangeUser changeEmailUser = new ChangeUser(changeEmail, creatingUser.getName());
 
     @Test
     @DisplayName("Check change name user without Authorization")
     @Description("PATCH api/auth/user")
-    public void ChangeNameUserWithoutAuthorizationTest() {
-        Response creatingResponse = creatingUser.creatingUser(creatingUser);
-        token = creatingUser.checkCreatedOK(creatingResponse);
-
-        Response response = changeNameUser.changeUserWithoutAuthorization(changeNameUser);
-        changeNameUser.errorAuthorization(response);
+    public void changeNameUserWithoutAuthorizationTest() {
+        Response response = changeUser.changeUserWithoutAuthorization(changeNameUser);
+        changeUser.errorAuthorization(response);
     }
 
     @Test
     @DisplayName("Check change email user without Authorization")
     @Description("PATCH api/auth/user")
-    public void ChangeEmailUserWithoutAuthorizationTest() {
-        Response creatingResponse = creatingUser.creatingUser(creatingUser);
-        token = creatingUser.checkCreatedOK(creatingResponse);
-
-        Response response = changeEmailUser.changeUserWithoutAuthorization(changeEmailUser);
-        changeEmailUser.errorAuthorization(response);
+    public void changeEmailUserWithoutAuthorizationTest() {
+        Response response = changeUser.changeUserWithoutAuthorization(changeEmailUser);
+        changeUser.errorAuthorization(response);
     }
 
     @Test
     @DisplayName("Check change name user with Authorization")
     @Description("PATCH api/auth/user")
-    public void ChangeNameUserWithAuthorizationTest() {
-        Response creatingResponse = creatingUser.creatingUser(creatingUser);
-        token = creatingUser.checkCreatedOK(creatingResponse);
-
-        Response response = changeNameUser.changeUserWithAuthorization(changeNameUser, token);
-        changeNameUser.changeUserOk(response);
-        String message = changeNameUser.changeNameUser(response);
-        Assert.assertEquals(changeNameUser.getName(), message);
+    public void changeNameUserWithAuthorizationTest() {
+        Response response = changeUser.changeUserWithAuthorization(changeNameUser, token);
+        changeUser.changeUserOk(response);
+        String message = changeUser.changeNameUser(response);
+        Assert.assertEquals(changeName, message);
     }
 
     @Test
     @DisplayName("Check change email user with Authorization")
     @Description("PATCH api/auth/user")
-    public void checkChangeEmailUserWithAuthorization() {
-        Response creatingResponse = creatingUser.creatingUser(creatingUser);
-        token = creatingUser.checkCreatedOK(creatingResponse);
-
-        Response response = changeEmailUser.changeUserWithAuthorization(changeEmailUser, token);
-        changeEmailUser.changeUserOk(response);
-        String message = changeEmailUser.changeEmailUser(response);
-        Assert.assertEquals(changeEmailUser.getEmail(), message);
+    public void changeEmailUserWithAuthorization() {
+        Response response = changeUser.changeUserWithAuthorization(changeEmailUser, token);
+        changeUser.changeUserOk(response);
+        String message = changeUser.changeEmailUser(response);
+        Assert.assertEquals(changeEmail, message);
     }
 
     @Test
     @DisplayName("Check change email user with Authorization on email other user")
     @Description("PATCH api/auth/user")
-    public void checkChangeAlienEmailUserWithAuthorization() {
-        Response firstUser = creatingUser.creatingUser(creatingUser);
-        token = creatingUser.checkCreatedOK(firstUser);
-
-        Response creatingEmailResponse = creatingUser.creatingUser(creatingEmailUser);
+    public void changeAlienEmailUserWithAuthorization() {
+        Response creatingEmailResponse = creatingUser.creatingUser(creatingSecondUser);
         secondToken = creatingUser.checkCreatedOK(creatingEmailResponse);
-
-        Response secondResponse = changeEmailUser.changeUserWithAuthorization(changeEmailUser, token);
-        changeEmailUser.changeUserForbidden(secondResponse);
+        Response secondResponse = changeUser.changeUserWithAuthorization(changeEmailUserOnAlien, token);
+        changeUser.changeUserForbidden(secondResponse);
     }
 
     @After

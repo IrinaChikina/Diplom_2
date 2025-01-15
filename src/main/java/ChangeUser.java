@@ -2,26 +2,19 @@ import io.qameta.allure.Step;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 import static io.restassured.RestAssured.given;
 import static java.net.HttpURLConnection.*;
 import static org.hamcrest.Matchers.equalTo;
 
-@AllArgsConstructor
-@Getter
 public class ChangeUser {
 
-    private String email;
-    private String name;
-
     @Step("Запрос на изменение данных пользователя без авторизации")
-    public Response changeUserWithoutAuthorization(ChangeUser changeUser) {
+    public Response changeUserWithoutAuthorization(UserLombok existingUser) {
         return given().log().all()
                 .contentType(ContentType.JSON)
                 .filter((new AllureRestAssured()))
-                .body(changeUser)
+                .body(existingUser)
                 .patch(Constant.API_USER);
     }
 
@@ -33,12 +26,12 @@ public class ChangeUser {
     }
 
     @Step("Запрос на изменение данных пользователя c авторизацией")
-    public Response changeUserWithAuthorization(ChangeUser changeUser, String token) {
+    public Response changeUserWithAuthorization(UserLombok existingUser, String token) {
         return given().log().all()
                 .contentType(ContentType.JSON)
                 .filter((new AllureRestAssured()))
                 .header("Authorization", token)
-                .body(changeUser)
+                .body(existingUser)
                 .patch(Constant.API_USER);
     }
 
@@ -51,13 +44,13 @@ public class ChangeUser {
 
     @Step("Проверка изменения имени пользоватлея")
     public String changeNameUser(Response response) {
-        return response.then().log().all()
+        return response.then()
                 .extract().path("user.name");
     }
 
     @Step("Проверка изменения email пользователя")
     public String changeEmailUser(Response response) {
-        return response.then().log().all()
+        return response.then()
                 .extract().path("user.email");
     }
 

@@ -63,7 +63,7 @@ public class CreatingOrder {
 
     @Step("Проверка сообщения при создании запроса на создание заказа с указанием ингредиентов для авторизированного пользователя")
     public void booleanMessageForOrder(Response response) {
-         response.then().log().all().assertThat().body("success", equalTo(true));
+        response.then().log().all().assertThat().body("success", equalTo(true));
     }
 
     @Step("Проверка текста сообщения ответа при создании запроса на создание заказа без авторизации")

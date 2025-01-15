@@ -8,12 +8,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ListOrderTest {
-
-    CreatingUser creatingUser = GeneratorUser.getRandomUser();
-
     String token;
 
     ListOrder listOrder = new ListOrder();
+    CreatingUser creatingUser = new CreatingUser();
+    UserLombok createdUser = GeneratorUser.getRandomUser();
 
     @Step("Запуск Stellar Burgers")
     @Before
@@ -32,7 +31,7 @@ public class ListOrderTest {
     @DisplayName("Check get list order for user with authorization")
     @Description("POST api/orders")
     public void getListOrderWithAuthorizationTest() {
-        Response response = creatingUser.creatingUser(creatingUser);
+        Response response = creatingUser.creatingUser(createdUser);
         token = creatingUser.checkCreatedOK(response);
         listOrder.listOrderWithAuthorizationForUser(token);
     }
